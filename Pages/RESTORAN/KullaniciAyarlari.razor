@@ -1,0 +1,78 @@
+﻿@page "/Kullanicilar"
+@using Models
+@using Bussiness.Contracts
+
+@inject IKullaniciInterface _kullaniciRepository
+@inject NavigationManager _navigationManager
+
+<div class="row mt-4">
+    <div class="col-3">
+        <h5>Kullanıcı Ayarları</h5>
+    </div>
+    <div class="col-3">
+        <NavLink href="Kullanicim" class="btn btn-danger">Kullanıcı Ekle</NavLink>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <table class="table table-dark">
+            <thead>
+                <tr>
+                    <th scope="col">Adı</th>
+                    <th scope="col">Soyadı</th>
+                    <th scope="col">Kullanıcı Adı</th>
+                    <th scope="col">Kullanıcı Şifre</th>
+
+                </tr>
+            </thead>
+            <tbody class="table-group-divider">
+
+                @if (KullaniciModelList.Any())
+                {
+                    foreach (var kullanici in KullaniciModelList)
+                    {
+                        <tr>
+
+                            <td>@kullanici.Adi</td>
+                            <td>@kullanici.Soyadi</td>
+                            <td>@kullanici.KulAdi</td>
+                            <td>@kullanici.KulSifre</td>
+
+
+
+                            <td>
+                                <NavLink href="@($"/kullanici/edit/{kullanici.Id}")" class="btn btn-primary">Edit</NavLink>
+                            </td>
+                        </tr>
+                    }
+
+                }
+                else
+                {
+                    <tr><td colspan="6">@ErrorMessage</td></tr>
+                }
+            </tbody>
+        </table>
+
+    </div>
+
+</div>
+
+
+
+@code {
+    private IEnumerable<KullaniciDto> KullaniciModelList { get; set; } = new List<KullaniciDto>();
+    public string ErrorMessage { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var data = await _kullaniciRepository.GetAllKullanici();
+
+        if (!data.IsSuccess)
+            ErrorMessage = data.Message;
+
+        else
+            KullaniciModelList = data.Data;
+    }
+}

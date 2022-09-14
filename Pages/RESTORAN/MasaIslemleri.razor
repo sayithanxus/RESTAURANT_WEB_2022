@@ -1,0 +1,105 @@
+﻿@page "/Masa/duzenle"
+@page "/Masa/ekle"
+@page "/masa/duzenle/{Id:int}"
+@using Models
+@using Bussiness.Contracts
+@inject IMasalarInterface _masalarRepository
+@inject NavigationManager _navigationManager
+@inject IJSRuntime _jsRuntime
+
+<h4>Masa Islemleri</h4>
+
+<div class="col-md-12">
+    <div class="card">
+        <div class="card-body">
+            <EditForm Model="masalarModel" OnValidSubmit="MasalarCreateOrUpdate">
+                <DataAnnotationsValidator></DataAnnotationsValidator>
+                <div class="form-group">
+                    <label>Masa Numarası</label>
+                    <InputNumber @bind-Value="masalarModel.MasaNo" class="form-control"></InputNumber>
+                    <ValidationMessage For="()=>masalarModel.MasaNo"></ValidationMessage>
+
+                </div>
+                <div class="form-group">
+                    <label>Masa Durum</label>
+                    <InputNumber @bind-Value="masalarModel.MasaDurum" class="form-control"></InputNumber>
+                    <ValidationMessage For="()=>masalarModel.MasaDurum"></ValidationMessage>
+
+                </div>
+                <div class="form-group">
+                    <button class="btn btn-success">Ekle/Güncelle</button>
+                    <NavLink href="MasaDurum" class="btn btn-danger">Geri dön</NavLink>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+
+@code {
+    [Parameter]
+    public int? Id { get; set; }
+
+    private MasalarDto masalarModel { get; set; } = new MasalarDto();
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        if (Id != null)
+        {
+
+            var data = await _masalarRepository.GetMasalar((int)Id);
+            masalarModel = data.Data;
+        }
+        else
+        {
+
+        }
+
+    }
+    private async Task MasalarCreateOrUpdate()
+    {
+        try
+        {
+            if (Id != null)
+            {
+                var updateData = await _masalarRepository.UpdateMasalar((int)Id, masalarModel);
+                if (updateData.IsSuccess)
+                {
+                    _navigationManager.NavigateTo("MasaDurum");
+                    await _jsRuntime.ToastrSuccess(updateData.Message);
+                }
+                else
+                {
+                    await _jsRuntime.ToastrError(updateData.Message);
+                }
+            }
+            else
+            {
+                var created = await _masalarRepository.CreateMasalar(masalarModel);
+                if (created.IsSuccess)
+                {
+                    _navigationManager.NavigateTo("MasaDurum");
+                    await _jsRuntime.ToastrSuccess(created.Message);
+                }
+                else
+                {
+                    await _jsRuntime.ToastrError(created.Message);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            await _jsRuntime.ToastrError(ex.Message.ToString());
+
+        }
+
+       
+        //else
+        //{
+        //    _navigationManager.NavigateTo("courselist");
+        //}
+    }
+
+
+}

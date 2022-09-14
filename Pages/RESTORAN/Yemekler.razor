@@ -1,0 +1,81 @@
+﻿@page "/Yemek"
+@using Models
+@using Bussiness.Contracts
+@inject IYemekInterface _courseRepository
+@inject NavigationManager _navigationManager
+   @using System;
+    @using System.Collections.Generic;
+    @using System.Linq;
+    @using System.Threading.Tasks;
+    @using Microsoft.AspNetCore.Components;
+    @using Microsoft.AspNetCore.Components.Rendering;
+    @using Microsoft.AspNetCore.Components.Forms;
+    @using Radzen;
+    @using Microsoft.JSInterop;
+
+
+    <div class="row mt-4">
+        <div class="col-3">
+            <h5>Yemek Listesi</h5>
+        </div>
+        <div class="col-3">
+
+            <NavLink href="duzens" class="btn btn-danger">Yemek Ekle</NavLink>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col">Yemek Adı</th>
+                        <th scope="col">Fiyat</th>
+
+                    </tr>
+                </thead>
+                <tbody class="table-group-divider">
+                    @if (YemekModelList.Any())
+                    {
+                        foreach (var yemek in YemekModelList)
+                        {
+                            <tr>
+
+                                <td>@yemek.YemekAdi</td>
+                                <td>@yemek.YemekFiyat</td>
+
+
+                                <td>
+                                    <NavLink href="@($"/yemek/duzenle/{yemek.Id}")" class="btn btn-primary">Düzenle</NavLink>
+                                </td>
+                            </tr>
+                        }
+
+                    }
+                    else
+                    {
+                        <tr><td colspan="6">@ErrorMessage</td></tr>
+                    }
+
+                </tbody>
+            </table>
+
+        </div>
+
+    </div>
+
+    @code {
+        private IEnumerable<YemekDto> YemekModelList { get; set; } = new List<YemekDto>();
+        public string ErrorMessage { get; set; }
+
+        protected override async Task OnInitializedAsync()
+        {
+            var data = await _courseRepository.GetAllYemek();
+
+            if (!data.IsSuccess)
+                ErrorMessage = data.Message;
+
+            else
+                YemekModelList = data.Data;
+        }
+    }

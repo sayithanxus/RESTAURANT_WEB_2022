@@ -1,0 +1,81 @@
+﻿@page "/MasaDurum"
+@using Models
+@using Bussiness.Contracts
+@inject IMasalarInterface _masalarRepository
+@inject NavigationManager _navigationManager
+
+<div class="row mt-4">
+    <div class="col-3">
+        <h4>Masalar</h4>
+    </div>
+    <div class="col-3">
+
+        <NavLink href="/Masa/ekle" class="btn btn-danger">Masa Ekle</NavLink>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">Masa Numarası</th>
+                    <th scope="col">Masa Durumu</th>
+
+                </tr>
+            </thead>
+            <tbody class="table-group-divider">
+                @if (MasalarModelList.Any())
+                {
+                    foreach (var masalar in MasalarModelList)
+                    {
+                        <tr>
+
+                            <td>@masalar.MasaNo</td>
+
+
+                            @if (masalar.MasaDurum == 1)
+                            {
+                                <td>Aktif</td>
+                            }
+                            else
+                            {
+                                <td>Pasif</td>
+                            }
+                            <td>
+                                <NavLink href="@($"/masa/duzenle/{masalar.Id}")" class="btn btn-primary">Düzenle</NavLink>
+                            </td>
+                        </tr>
+                    }
+
+                }
+                else
+                {
+                    <tr><td colspan="6">@ErrorMessage</td></tr>
+                }
+
+            </tbody>
+        </table>
+
+    </div>
+
+</div>
+
+@code {
+    private IEnumerable<MasalarDto> MasalarModelList { get; set; } = new List<MasalarDto>();
+
+    public string ErrorMessage { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var data = await _masalarRepository.GetAllMasalar();
+
+        if (!data.IsSuccess)
+            ErrorMessage = data.Message;
+
+        else
+            MasalarModelList = data.Data;
+    }
+
+
+}

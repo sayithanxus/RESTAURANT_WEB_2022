@@ -1,0 +1,113 @@
+﻿@page "/Kullanicim"
+@page "/Kullanicilar/duzenle"
+@page "/kullanici/edit/{Id:int}"
+@using Models
+@using Bussiness.Contracts
+@inject IKullaniciInterface _kullaniciRepository
+@inject NavigationManager _navigationManager
+@inject IJSRuntime _jsRuntime
+
+<h4>
+    Kullanici Ayarları
+</h4>
+<div class="col-md-12">
+    <div class="card">
+        <div class="card-body">
+            <EditForm Model="kullaniciModel" OnValidSubmit="KullaniciCreateOrUpdate">
+                <DataAnnotationsValidator></DataAnnotationsValidator>
+                <div class="form-group">
+                    <label>Adi</label>
+                    <InputText @bind-Value="kullaniciModel.Adi" class="form-control"></InputText>
+                    <ValidationMessage For="()=>kullaniciModel.Adi"></ValidationMessage>
+                </div>
+                <div class="form-group">
+                    <label>Soyadi</label>
+                    <InputText @bind-Value="kullaniciModel.Soyadi" class="form-control"></InputText>
+                    <ValidationMessage For="()=>kullaniciModel.Soyadi"></ValidationMessage>
+                </div>
+                <div class="form-group">
+                    <label>Kullanıcı Adı</label>
+                    <InputText @bind-Value="kullaniciModel.KulAdi" class="form-control"></InputText>
+                    <ValidationMessage For="()=>kullaniciModel.KulAdi"></ValidationMessage>
+                </div>
+                <div class="form-group">
+                    <label>Şifre</label>
+                    <InputText @bind-Value="kullaniciModel.KulSifre" class="form-control"></InputText>
+                    <ValidationMessage For="()=>kullaniciModel.KulSifre"></ValidationMessage>
+                </div>
+
+                <div class="form-group">
+                    <button class="btn btn-success">Ekle</button>
+                    <NavLink href="Kullanicilar" class="btn btn-danger">Geri Dön</NavLink>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int? Id { get; set; }
+
+
+    private KullaniciDto kullaniciModel { get; set; } = new KullaniciDto();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id != null)
+        {
+            var data = await _kullaniciRepository.GetKullanici((int)Id);
+            kullaniciModel = data.Data;
+        }
+        else
+        {
+
+        }
+    }
+    private async Task KullaniciCreateOrUpdate()
+    {
+        try
+        {
+            if (Id != null)
+            {
+                var updateData = await _kullaniciRepository.UpdateKullanici((int)Id, kullaniciModel);
+                if (updateData.IsSuccess)
+                {
+                    await _jsRuntime.ToastrSuccess(updateData.Message);
+                    _navigationManager.NavigateTo("Kullanicilar");
+                }
+                else
+                {
+                    await _jsRuntime.ToastrError(updateData.Message);
+                }
+            }
+            else
+            {
+                var created = await _kullaniciRepository.CreateKullanici(kullaniciModel);
+                if (created.IsSuccess)
+                {
+                    _navigationManager.NavigateTo("Kullanicilar");
+                    await _jsRuntime.ToastrSuccess(created.Message);
+                }
+                else
+                {
+                    await _jsRuntime.ToastrError(created.Message);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+
+            await _jsRuntime.ToastrError(ex.Message.ToString());
+        }
+
+        //_navigationManager.NavigateTo("courselist");
+        //else
+        //{
+        //    _navigationManager.NavigateTo("courselist");
+        //}
+    }
+
+
+}
+

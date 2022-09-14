@@ -1,0 +1,87 @@
+﻿@page "/Siparis"
+@using Models
+@using Bussiness.Contracts
+@inject IMasalarInterface _masalarRepository
+@inject NavigationManager _navigationManager
+
+<div class="row mt-4">
+    <div class="col-3">
+        <h4>Masa Seç</h4>
+    </div>
+    
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">Masa Numarası</th>
+                    <th scope="col">Masa Durumu</th>
+
+                </tr>
+            </thead>
+            <tbody class="table-group-divider">
+                @if (MasalarModelList.Any())
+                {
+                    foreach (var masam in MasalarModelList)
+                    {
+                        <tr>
+
+                            <td>@masam.MasaNo</td>
+
+
+                            @if (masam.MasaDurum == 1)
+                            {
+                                <td>Açık</td>
+                            }
+                            else
+                            {
+                                <td>Kapalı</td>
+                            }
+                        <td>
+                            @if (masam.MasaDurum == 1)
+                            {
+                                <NavLink href="@($"/siparis/olustur/{masam.Id}")" class="btn btn-danger">Sipariş ver</NavLink>
+                            }
+                            @if (masam.MasaDurum != 1)
+                            {
+                                <NavLink class="btn btn-danger" disabled>Sipariş ver</NavLink>
+
+                            }
+
+                        </td>
+                        </tr>
+                    }
+
+                }
+                else
+                {
+                    <tr><td colspan="6">@ErrorMessage</td></tr>
+                }
+
+            </tbody>
+        </table>
+
+    </div>
+
+</div>
+
+@code {
+    private IEnumerable<MasalarDto> MasalarModelList { get; set; } = new List<MasalarDto>();
+
+    public string ErrorMessage { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var data = await _masalarRepository.GetAllMasalar();
+
+        if (!data.IsSuccess)
+            ErrorMessage = data.Message;
+
+        else
+            MasalarModelList = data.Data;
+    }
+
+
+}

@@ -1,0 +1,41 @@
+﻿@page "/soyle"
+@page "/siparis/olustur/{Id:int}"
+@using Models
+@using Bussiness.Contracts
+@inject IYemekInterface _yemekRepository
+
+@inject NavigationManager _navigationManager
+
+
+<h3>Masa Numarası : @Id </h3>
+
+
+
+
+
+
+
+
+@code {
+    [Parameter]
+    public int? Id { get; set; }
+    private YemekDto yemekModel { get; set; } = new YemekDto();
+    
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        if (Id != null)
+        {
+
+            var data = await _yemekRepository.GetYemek((int)Id);
+            yemekModel = data.Data;
+        }
+        else
+        {
+
+        }
+
+    }
+
+}

@@ -1,0 +1,149 @@
+﻿@page "/yemek/duzenle/{Id:int}"
+@page "/duzens"
+@using Models
+@using Bussiness.Contracts
+@inject IYemekInterface _yemekRepository
+@inject NavigationManager _navigationManager
+@inject IJSRuntime _jsRuntime
+
+
+
+
+<div class="col-md-12">
+    <div class="card">
+        <div class="card-body">
+            <EditForm Model="yemekModel" OnValidSubmit="YemekCreateOrUpdate">
+                <DataAnnotationsValidator></DataAnnotationsValidator>
+                <div class="form-group">
+                    <label>Yemek Adı</label>
+                    <InputText @bind-Value="yemekModel.YemekAdi" class="form-control"></InputText>
+                    <ValidationMessage For="()=>yemekModel.YemekAdi"></ValidationMessage>
+
+                </div>
+                <div class="form-group">
+                    <label>Yemek Fiyat</label>
+                    <InputNumber @bind-Value="yemekModel.YemekFiyat" class="form-control"></InputNumber>
+                    <ValidationMessage For="()=>yemekModel.YemekFiyat"></ValidationMessage>
+
+                </div>
+                 <div class="form-group">
+                    <label>Kategori No</label>
+                    <InputNumber @bind-Value="yemekModel.KatId" class="form-control"></InputNumber>
+                    <ValidationMessage For="()=>yemekModel.KatId"></ValidationMessage>
+
+                </div>
+                <div class="form-group">
+                    <button class="btn btn-success">Ekle/Güncelle</button>
+                    <NavLink href="MasaDurum" class="btn btn-danger">Geri dön</NavLink>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+
+
+@code {
+    [Parameter]
+    public int? Id { get; set; }
+
+    private YemekDto yemekModel { get; set; } = new YemekDto();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id != null)
+        {
+            var data = await _yemekRepository.GetYemek((int)Id);
+            yemekModel = data.Data;
+        }
+        else
+        {
+
+        }
+    }
+    private async Task YemekCreateOrUpdate()
+    {
+        try
+        {
+            if (Id != null)
+            {
+                var updateData = await _yemekRepository.UpdateYemek((int)Id, yemekModel);
+                if (updateData.IsSuccess)
+                {
+                    await _jsRuntime.ToastrSuccess(updateData.Message);
+                    _navigationManager.NavigateTo("Yemek");
+                }
+                else
+                {
+                    await _jsRuntime.ToastrError(updateData.Message);
+                }
+            }
+            else
+            {
+                var created = await _yemekRepository.CreateYemek(yemekModel);
+                if (created.IsSuccess)
+                {
+                    _navigationManager.NavigateTo("Yemek");
+                    await _jsRuntime.ToastrSuccess(created.Message);
+                }
+                else
+                {
+                    await _jsRuntime.ToastrError(created.Message);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+
+            await _jsRuntime.ToastrError(ex.Message.ToString());
+        }
+    }
+
+   
+    //private async Task YemekCreateOrUpdate()
+    //{
+    //    try
+    //    {
+    //        if (Id != null)
+    //        {
+    //            var updateData = await _yemekRepository.UpdateYemek((int)Id, yemekModel);
+    //            if (updateData.IsSuccess)
+    //            {
+    //                await _jsRuntime.ToastrSuccess(updateData.Message);
+    //                _navigationManager.NavigateTo("Kullanicilar");
+    //            }
+    //            else
+    //            {
+    //                await _jsRuntime.ToastrError(updateData.Message);
+    //            }
+    //        }
+    //        else
+    //        {
+    //            var created = await _yemekRepository.CreateYemek(yemekModel);
+    //            if (created.IsSuccess)
+    //            {
+    //                _navigationManager.NavigateTo("Kullanicilar");
+    //                await _jsRuntime.ToastrSuccess(created.Message);
+    //            }
+    //            else
+    //            {
+    //                await _jsRuntime.ToastrError(created.Message);
+    //            }
+    //        }
+    //    }
+    //    catch (Exception ex)
+    //    {
+
+    //        await _jsRuntime.ToastrError(ex.Message.ToString());
+    //    }
+
+    //    //_navigationManager.NavigateTo("courselist");
+    //    //else
+    //    //{
+    //    //    _navigationManager.NavigateTo("courselist");
+    //    //}
+    //}
+
+
+}
+
